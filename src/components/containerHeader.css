@@ -1,0 +1,40 @@
+.service-info {
+  display: flex;
+  width: 501px;
+  padding: 8px;
+  gap: 16px;
+}
+
+.service-block {
+  width: 235px;
+  text-align: start;
+}
+
+.file-path{
+  color: #505565;
+  background-color: #D3D4D8;
+  border-radius: 50px;
+  width: 235px;
+  height: 24px;
+  padding: 4px 10px;
+  gap: 5px;
+  box-sizing: border-box;
+}
+
+.load-time{
+  color: #232735;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.button-container {
+  display: flex;
+  padding: 16px;
+  gap: 8px;
+}
+
+.button-container button {
+  border: none;
+  background: none;
+  width: fit-content;
+}
