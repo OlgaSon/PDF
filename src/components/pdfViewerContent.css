@@ -1,0 +1,16 @@
+.pdfViewerContent {
+  padding: 0 16px;
+  box-shadow: 0 25px 50px 0 rgba (62, 62, 62, 0.15);
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+}
+
+.react-pdf__Page{
+  display: inline-block;
+}
+
+.react-pdf__Page__textContent{
+  line-height: 0.8;
+  /* margin-left: 1px; */
+}

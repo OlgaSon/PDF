@@ -1,16 +1,16 @@
 import React from "react";
-import { Container } from "./components/Container";
+import { PdfViewer } from "./components/PdfViewer";
 
 function App() {
   const pathToPdf =
-    // "lyvyMarketSegment.pdf";
-    // "StatementOfReturn.pdf";
-    // "Eng.pdf";
-    "RxJs.pdf";
+    // "./lyvyMarketSegment.pdf";
+    // "./StatementOfReturn.pdf";
+    // "./Eng.pdf";
+    "./RxJs.pdf";
 
   return (
     <div className="App">
-      <Container pathToPdf={pathToPdf} />
+      <PdfViewer pathToPdf={pathToPdf} />
     </div>
   );
 }

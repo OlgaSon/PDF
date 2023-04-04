@@ -1,4 +1,4 @@
-.container{
+.pdfViewer{
   display: flex;
   align-items: center;
   flex-direction: column;
@@ -8,5 +8,7 @@
   font-size: 12px;
   line-height: 16px;
   color: #8B90A0;
-  box-sizing: border-box;
+  box-sizing: border-box; 
+  max-width: 100%;
+  width: 100%;
 }

@@ -1,0 +1,46 @@
+.pdfViewerHeader {
+  width: 100%;
+  margin-bottom: 16px;     
+}
+
+.loading-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 8px 16px;
+  text-align: start;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+
+.pdf-path{
+  color: #505565;
+  background-color: #D3D4D8;
+  border-radius: 50px;
+  min-width: 20vw;
+  max-width: 50vw;
+  height: 24px;
+  padding: 4px 10px;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.render-duration{
+  color: #232735;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.zoom-controls {
+  display: flex;
+  width: fit-content;
+  padding: 16px;
+}
+
+.zoom-controls button {
+  border: none;
+  background: none;
+  height: 20px;
+  padding: 0;
+  margin: 0 8px 0 0;
+}
