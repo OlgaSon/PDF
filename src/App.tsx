@@ -2,7 +2,7 @@ import React from "react";
 import { PdfViewer } from "./components/PdfViewer";
 
 function App() {
-  const pathToPdf =
+  const pathToFile =
     // "./lyvyMarketSegment.pdf";
     // "./StatementOfReturn.pdf";
     // "./Eng.pdf";
@@ -10,7 +10,7 @@ function App() {
 
   return (
     <div className="App">
-      <PdfViewer pathToPdf={pathToPdf} />
+      <PdfViewer pathToFile={pathToFile} />
     </div>
   );
 }

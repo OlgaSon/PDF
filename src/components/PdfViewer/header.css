@@ -1,5 +1,4 @@
-.pdfViewerHeader {
-  width: 100%;
+.header {
   margin-bottom: 16px;     
 }
 
@@ -12,7 +11,7 @@
   padding: 8px;
 }
 
-.pdf-path{
+.file-path{
   color: #505565;
   background-color: #D3D4D8;
   border-radius: 50px;
