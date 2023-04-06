@@ -1,7 +1,8 @@
 import React, { FC } from "react";
 import { ZoomIn, ZoomOut } from "../../assets";
+import { roundToOneDigit, timeToString } from "../../utils";
+import { MAX_SCALE, MIN_SCALE, SCALE_STEP } from "./constants";
 import "./header.css";
-import { timeToString } from "../../utils/timeToString";
 
 interface IHeaderProps {
   pageScale: number;
@@ -16,8 +17,11 @@ export const Header: FC<IHeaderProps> = ({
   pathToFile,
   renderTime,
 }) => {
-  const handleZoomIn = () => setPageScale((prevScale) => prevScale + 0.1);
-  const handleZoomOut = () => setPageScale((prevScale) => prevScale - 0.1);
+  const handleZoomIn = () =>
+    setPageScale((prevScale) => roundToOneDigit(prevScale + SCALE_STEP));
+
+  const handleZoomOut = () =>
+    setPageScale((prevScale) => roundToOneDigit(prevScale - SCALE_STEP));
 
   return (
     <header className="header">
@@ -28,10 +32,10 @@ export const Header: FC<IHeaderProps> = ({
         <div className="render-duration">{timeToString(renderTime)}</div>
       </div>
       <div className="zoom-controls">
-        <button onClick={handleZoomIn} disabled={pageScale >= 5}>
+        <button onClick={handleZoomIn} disabled={pageScale >= MAX_SCALE}>
           <ZoomIn />
         </button>
-        <button onClick={handleZoomOut} disabled={pageScale < 0.2}>
+        <button onClick={handleZoomOut} disabled={pageScale <= MIN_SCALE}>
           <ZoomOut />
         </button>
       </div>

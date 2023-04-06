@@ -1,9 +1,12 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 import { Document } from "react-pdf";
 import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
+import { usePinch } from "@use-gesture/react";
 import { FixedSizeList as List } from "react-window";
-import "./content.css";
 import { PageItem } from "./PageItem";
+import { roundToOneDigit } from "../../utils";
+import { MAX_SCALE, MIN_SCALE, SCALE_STEP } from "./constants";
+import "./content.css";
 
 interface IContentProps {
   pathToFile: string;
@@ -25,6 +28,26 @@ export const Content: FC<IContentProps> = ({
   const [documentWidth, setDocumentWidth] = useState(0);
   const pdfDocumentRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const handleTouchPreventDefault = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+      }
+    };
+    document.addEventListener("touchstart", handleTouchPreventDefault, {
+      passive: false,
+    });
+    document.addEventListener("touchmove", handleTouchPreventDefault, {
+      passive: false,
+    });
+    document.addEventListener("touchend", handleTouchPreventDefault, {
+      passive: false,
+    });
+    document.addEventListener("wheel", (e) => e.preventDefault(), {
+      passive: false,
+    });
+  }, []);
+
   const onDocumentLoadSuccess = (pdfObject: PDFDocumentProxy) => {
     setTotalPages(pdfObject.numPages);
     calculateInitialPageScale(pdfObject);
@@ -36,7 +59,7 @@ export const Content: FC<IContentProps> = ({
     const firstPageWidth = firstPageViewport.width;
     const scalingFactor = documentWidth / firstPageWidth;
     if (scalingFactor < 1) {
-      setPageScale(scalingFactor);
+      setPageScale(roundToOneDigit(scalingFactor));
     }
   };
 
@@ -49,6 +72,23 @@ export const Content: FC<IContentProps> = ({
     }
   }, []);
 
+  const pinchHandler = usePinch(
+    ({ canceled, memo, direction }) => {
+      setTimeout(() => {
+        if (canceled) return;
+
+        const scale = roundToOneDigit(
+          memo
+            ? memo + direction[0] * SCALE_STEP
+            : pageScale + direction[0] * SCALE_STEP
+        );
+        setPageScale(Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE));
+        return Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
+      }, 0);
+    },
+    { pinchOnWheel: true }
+  );
+
   return (
     <Document
       className="content"
@@ -56,11 +96,17 @@ export const Content: FC<IContentProps> = ({
       onLoadSuccess={onDocumentLoadSuccess}
       onLoadError={(error) => console.log(`Error: ${error.message}`)}
       inputRef={pdfDocumentRef}
+      {...pinchHandler()}
     >
       <List
         itemCount={totalPages}
         itemSize={pageSize}
-        itemData={{ pageScale, visibleStartIndex, setPageSize, setRenderTime }}
+        itemData={{
+          pageScale,
+          visibleStartIndex,
+          setPageSize,
+          setRenderTime,
+        }}
         height={documentHeight}
         width={"100%"}
         onItemsRendered={({ visibleStartIndex }) => {
