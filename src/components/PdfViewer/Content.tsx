@@ -1,12 +1,15 @@
 import React, { FC, useEffect, useRef, useState } from "react";
-import { Document } from "react-pdf";
-import { PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
+import { Document, pdfjs } from "react-pdf";
+import { PDFDocumentProxy } from "pdfjs-dist";
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 import { usePinch } from "@use-gesture/react";
 import { FixedSizeList as List } from "react-window";
 import { PageItem } from "./PageItem";
-import { roundToOneDigit } from "../../utils";
-import { MAX_SCALE, MIN_SCALE, SCALE_STEP } from "./constants";
+import { roundToDecimal } from "../../utils";
+import { calculateNewScale } from "./calculateNewScale";
 import "./content.css";
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 interface IContentProps {
   pathToFile: string;
@@ -34,18 +37,12 @@ export const Content: FC<IContentProps> = ({
         e.preventDefault();
       }
     };
-    document.addEventListener("touchstart", handleTouchPreventDefault, {
-      passive: false,
-    });
-    document.addEventListener("touchmove", handleTouchPreventDefault, {
-      passive: false,
-    });
-    document.addEventListener("touchend", handleTouchPreventDefault, {
-      passive: false,
-    });
-    document.addEventListener("wheel", (e) => e.preventDefault(), {
-      passive: false,
-    });
+    const pdf = pdfDocumentRef.current;
+    if (pdf) {
+      pdf.addEventListener("touchstart", handleTouchPreventDefault);
+      pdf.addEventListener("touchmove", handleTouchPreventDefault);
+      pdf.addEventListener("touchend", handleTouchPreventDefault);
+    }
   }, []);
 
   const onDocumentLoadSuccess = (pdfObject: PDFDocumentProxy) => {
@@ -57,64 +54,66 @@ export const Content: FC<IContentProps> = ({
     const firstPage = await pdfObject.getPage(1);
     const firstPageViewport = firstPage.getViewport({ scale: 1 });
     const firstPageWidth = firstPageViewport.width;
-    const scalingFactor = documentWidth / firstPageWidth;
+    const scalingFactor = roundToDecimal(documentWidth / firstPageWidth);
     if (scalingFactor < 1) {
-      setPageScale(roundToOneDigit(scalingFactor));
+      setPageScale(scalingFactor);
     }
   };
 
   useEffect(() => {
     if (pdfDocumentRef.current) {
       setDocumentHeight(pdfDocumentRef.current.clientHeight);
-      const width = (pdfDocumentRef.current.firstChild as HTMLElement)
-        .clientWidth;
-      setDocumentWidth(width);
+      setDocumentWidth(pdfDocumentRef.current.clientWidth);
     }
-  }, []);
+  }, [pdfDocumentRef]);
 
-  const pinchHandler = usePinch(
-    ({ canceled, memo, direction }) => {
-      setTimeout(() => {
-        if (canceled) return;
-
-        const scale = roundToOneDigit(
-          memo
-            ? memo + direction[0] * SCALE_STEP
-            : pageScale + direction[0] * SCALE_STEP
-        );
-        setPageScale(Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE));
-        return Math.min(Math.max(scale, MIN_SCALE), MAX_SCALE);
-      }, 0);
+  usePinch(
+    ({ active, memo, direction }) => {
+      if (!active) return;
+      const deltaX = direction[0];
+      const deltaY = direction[1];
+      const zoomIn = deltaX > 0 && deltaY > 0;
+      const zoomOut = deltaX < 0 && deltaY < 0;
+      if (zoomIn || zoomOut) {
+        calculateNewScale(memo, deltaY, pageScale, setPageScale);
+      }
     },
-    { pinchOnWheel: true }
+    {
+      pinchOnWheel: false,
+      target: pdfDocumentRef,
+      eventOptions: { passive: false },
+    }
   );
 
   return (
-    <Document
-      className="content"
-      file={pathToFile}
-      onLoadSuccess={onDocumentLoadSuccess}
-      onLoadError={(error) => console.log(`Error: ${error.message}`)}
-      inputRef={pdfDocumentRef}
-      {...pinchHandler()}
-    >
-      <List
-        itemCount={totalPages}
-        itemSize={pageSize}
-        itemData={{
-          pageScale,
-          visibleStartIndex,
-          setPageSize,
-          setRenderTime,
-        }}
-        height={documentHeight}
-        width={"100%"}
-        onItemsRendered={({ visibleStartIndex }) => {
-          setVisibleStartIndex(visibleStartIndex);
-        }}
+    <div className="content">
+      <Document
+        file={pathToFile}
+        onLoadSuccess={onDocumentLoadSuccess}
+        /*  */
+        onLoadError={(error) => console.log(`Error: ${error.message}`)}
+        /*  */
+        inputRef={pdfDocumentRef}
       >
-        {PageItem}
-      </List>
-    </Document>
+        <List
+          itemCount={totalPages}
+          itemSize={pageSize}
+          itemData={{
+            pageScale,
+            visibleStartIndex,
+            setPageScale,
+            setPageSize,
+            setRenderTime,
+          }}
+          height={documentHeight}
+          width={"100%"}
+          onItemsRendered={({ visibleStartIndex }) => {
+            setVisibleStartIndex(visibleStartIndex);
+          }}
+        >
+          {PageItem}
+        </List>
+      </Document>
+    </div>
   );
 };

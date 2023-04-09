@@ -4,9 +4,6 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "./pdfViewer.css";
 import { Header } from "./Header";
 import { Content } from "./Content";
-import { pdfjs } from "react-pdf";
-
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 interface IPdfViewerProps {
   pathToFile: string;

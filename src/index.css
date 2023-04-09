@@ -1,7 +1,16 @@
 @font-face {
   font-family: 'Roboto';
-  src: local('Roboto'),
-    url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+  src: url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kg.woff2') format('woff2'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvnz.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvn8zg.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvtc.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvno4A.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1KvnpoxY.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvn8zQ.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvn86KA.woff') format('woff'),
+       url('https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu4mxKKTU1Kvnpoxc.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
 }
 
 body {

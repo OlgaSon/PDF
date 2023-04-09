@@ -1,2 +1,2 @@
-export { roundToOneDigit } from "./roundToOneDigit";
+export { roundToDecimal } from "./roundToDecimal";
 export { timeToString } from "./timeToString";
