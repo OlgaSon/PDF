@@ -1,9 +1,9 @@
 import React, { FC, useState } from "react";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "./pdfViewer.css";
 import { Header } from "./Header";
 import { Content } from "./Content";
+import styles from "./pdfViewer.module.css";
 
 interface IPdfViewerProps {
   pathToFile: string;
@@ -14,7 +14,7 @@ export const PdfViewer: FC<IPdfViewerProps> = ({ pathToFile }) => {
   const [renderTime, setRenderTime] = useState(0);
 
   return (
-    <div className="pdfViewer">
+    <div className={styles.pdfViewer}>
       <Header
         pathToFile={pathToFile}
         pageScale={pageScale}

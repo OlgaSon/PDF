@@ -7,7 +7,7 @@ import { FixedSizeList as List } from "react-window";
 import { PageItem } from "./PageItem";
 import { roundToDecimal } from "../../utils";
 import { calculateNewScale } from "./calculateNewScale";
-import "./content.css";
+import styles from "./content.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
@@ -45,6 +45,13 @@ export const Content: FC<IContentProps> = ({
     }
   }, []);
 
+  useEffect(() => {
+    if (pdfDocumentRef.current) {
+      setDocumentHeight(pdfDocumentRef.current.clientHeight);
+      setDocumentWidth(pdfDocumentRef.current.clientWidth);
+    }
+  }, [pdfDocumentRef]);
+
   const onDocumentLoadSuccess = (pdfObject: PDFDocumentProxy) => {
     setTotalPages(pdfObject.numPages);
     calculateInitialPageScale(pdfObject);
@@ -59,13 +66,6 @@ export const Content: FC<IContentProps> = ({
       setPageScale(scalingFactor);
     }
   };
-
-  useEffect(() => {
-    if (pdfDocumentRef.current) {
-      setDocumentHeight(pdfDocumentRef.current.clientHeight);
-      setDocumentWidth(pdfDocumentRef.current.clientWidth);
-    }
-  }, [pdfDocumentRef]);
 
   usePinch(
     ({ active, memo, direction }) => {
@@ -86,8 +86,9 @@ export const Content: FC<IContentProps> = ({
   );
 
   return (
-    <div className="content">
+    <div className={styles.wrapper}>
       <Document
+        className={styles.document}
         file={pathToFile}
         onLoadSuccess={onDocumentLoadSuccess}
         /*  */

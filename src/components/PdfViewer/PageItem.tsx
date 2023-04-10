@@ -1,8 +1,9 @@
-import { useWheel } from "@use-gesture/react";
 import React, { FC, memo, useEffect, useRef } from "react";
 import { PDFPageProxy, Page } from "react-pdf";
 import { ListChildComponentProps } from "react-window";
+import { useWheel } from "@use-gesture/react";
 import { calculateNewScale } from "./calculateNewScale";
+import styles from "./pageItem.module.css";
 
 const GUTTER = 10;
 
@@ -53,9 +54,9 @@ export const PageItem: FC<IPageItemProps> = memo(
       setPageSize(page.height);
     };
 
-    /* Adding gutter between pages */
     const _style = {
       ...style,
+      /* Adding gutter between pages */
       top: ((style?.top as number) || 0) + (index - visibleStartIndex) * GUTTER,
       maxWidth: "100%",
       width: "max-content",
@@ -72,9 +73,10 @@ export const PageItem: FC<IPageItemProps> = memo(
     );
 
     return (
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div className={styles.wrapper}>
         <div style={_style} ref={pageRef}>
           <Page
+            className={styles.page}
             pageNumber={index + 1}
             scale={pageScale}
             onRenderSuccess={onPageRenderSuccess}

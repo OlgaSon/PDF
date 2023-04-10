@@ -2,7 +2,7 @@ import React, { FC } from "react";
 import { ZoomIn, ZoomOut } from "../../assets";
 import { roundToDecimal, timeToString } from "../../utils";
 import { MAX_SCALE, MIN_SCALE, SCALE_STEP } from "./constants";
-import "./header.css";
+import styles from "./header.module.css";
 
 interface IHeaderProps {
   pageScale: number;
@@ -24,14 +24,14 @@ export const Header: FC<IHeaderProps> = ({
     setPageScale((prevScale) => roundToDecimal(prevScale - SCALE_STEP));
 
   return (
-    <header className="header">
-      <div className="loading-info">
+    <header className={styles.header}>
+      <div className={styles.loadingInfo}>
         <div>LOADED URL</div>
         <div>RENDER TIME</div>
-        <div className="file-path">{pathToFile}</div>
-        <div className="render-duration">{timeToString(renderTime)}</div>
+        <div className={styles.filePath}>{pathToFile}</div>
+        <div className={styles.renderDuration}>{timeToString(renderTime)}</div>
       </div>
-      <div className="zoom-controls">
+      <div className={styles.zoomControls}>
         <button onClick={handleZoomOut} disabled={pageScale <= MIN_SCALE}>
           <ZoomOut />
         </button>
