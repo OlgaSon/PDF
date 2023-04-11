@@ -38,12 +38,6 @@ export const PageItem: FC<IPageItemProps> = memo(
       }
     }, [index, pageScale]);
 
-    useEffect(() => {
-      const page = pageRef.current;
-      if (page)
-        page.addEventListener("wheel", (e: WheelEvent) => e.preventDefault());
-    }, [pageRef]);
-
     const onPageRenderSuccess = (page: PDFPageProxy) => {
       if (page.pageNumber === 1) {
         const renderDuration = Math.round(
@@ -65,9 +59,12 @@ export const PageItem: FC<IPageItemProps> = memo(
     };
 
     useWheel(
-      ({ memo, direction }) => {
-        const deltaY = -direction[1];
-        calculateNewScale(memo, deltaY, pageScale, setPageScale);
+      ({ ctrlKey, direction, event, memo }) => {
+        if (ctrlKey) {
+          event.preventDefault();
+          const deltaY = -direction[1];
+          calculateNewScale(memo, deltaY, pageScale, setPageScale);
+        }
       },
       { eventOptions: { passive: false }, target: pageRef }
     );
