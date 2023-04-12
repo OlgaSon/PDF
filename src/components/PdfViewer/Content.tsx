@@ -2,11 +2,12 @@ import React, { FC, useEffect, useRef, useState } from "react";
 import { Document, pdfjs } from "react-pdf";
 import { PDFDocumentProxy } from "pdfjs-dist";
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
-import { usePinch } from "@use-gesture/react";
+import { useGesture } from "@use-gesture/react";
 import { FixedSizeList as List } from "react-window";
 import { PageItem } from "./PageItem";
 import { roundToDecimal } from "../../utils";
-import { calculateNewScale } from "./calculateNewScale";
+import { calculateNewScale } from "./utils/calculateNewScale";
+import { INITIAL_SCALE } from "./constants";
 import styles from "./content.module.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
@@ -33,9 +34,7 @@ export const Content: FC<IContentProps> = ({
 
   useEffect(() => {
     const handleTouchPreventDefault = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-      }
+      if (e.touches.length === 2) e.preventDefault();
     };
     const pdf = pdfDocumentRef.current;
     if (pdf) {
@@ -59,7 +58,7 @@ export const Content: FC<IContentProps> = ({
 
   const calculateInitialPageScale = async (pdfObject: PDFDocumentProxy) => {
     const firstPage = await pdfObject.getPage(1);
-    const firstPageViewport = firstPage.getViewport({ scale: 1 });
+    const firstPageViewport = firstPage.getViewport({ scale: INITIAL_SCALE });
     const firstPageWidth = firstPageViewport.width;
     const scalingFactor = roundToDecimal(documentWidth / firstPageWidth);
     if (scalingFactor < 1) {
@@ -67,20 +66,31 @@ export const Content: FC<IContentProps> = ({
     }
   };
 
-  usePinch(
-    ({ active, memo, direction }) => {
-      if (!active) return;
-      const deltaX = direction[0];
-      const deltaY = direction[1];
-      const zoomIn = deltaX > 0 && deltaY > 0;
-      const zoomOut = deltaX < 0 && deltaY < 0;
-      if (zoomIn || zoomOut) {
-        calculateNewScale(memo, deltaY, pageScale, setPageScale);
-      }
+  useGesture(
+    {
+      onPinch: ({ active, direction, ...data }) => {
+        if (!active) return;
+        const deltaX = direction[0];
+        const deltaY = direction[1];
+        const zoomIn = deltaX > 0 && deltaY > 0;
+        const zoomOut = deltaX < 0 && deltaY < 0;
+        if (zoomIn || zoomOut) {
+          const newScale = calculateNewScale(pageScale, deltaY);
+          setPageScale(newScale);
+        }
+      },
+      onWheel: ({ active, ctrlKey, direction, event, ...data }) => {
+        if (active && ctrlKey) {
+          event.preventDefault();
+          const deltaY = -direction[1];
+          const newScale = calculateNewScale(pageScale, deltaY);
+          setPageScale(newScale);
+        }
+      },
     },
     {
-      pinchOnWheel: false,
       target: pdfDocumentRef,
+      pinch: { pinchOnWheel: false },
       eventOptions: { passive: false },
     }
   );
@@ -91,9 +101,6 @@ export const Content: FC<IContentProps> = ({
         className={styles.document}
         file={pathToFile}
         onLoadSuccess={onDocumentLoadSuccess}
-        /*  */
-        onLoadError={(error) => console.log(`Error: ${error.message}`)}
-        /*  */
         inputRef={pdfDocumentRef}
       >
         <List
@@ -102,12 +109,11 @@ export const Content: FC<IContentProps> = ({
           itemData={{
             pageScale,
             visibleStartIndex,
-            setPageScale,
             setPageSize,
             setRenderTime,
           }}
           height={documentHeight}
-          width={"100%"}
+          width="100%"
           onItemsRendered={({ visibleStartIndex }) => {
             setVisibleStartIndex(visibleStartIndex);
           }}

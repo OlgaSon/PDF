@@ -1,15 +1,8 @@
-.wrapper{
-  display: flex;
-  justify-content: center;
-}
-
-.page{
+.page {
   filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.1));
-  line-height: 0.8;
+  display: inline-block;
 }
 
-/* 
-.react-pdf__Page__textContent{
+.page :global .react-pdf__Page__textContent {
   line-height: 0.8;
-} 
-*/
+}
