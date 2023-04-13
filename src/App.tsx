@@ -9,7 +9,7 @@ function App() {
   // "./RxJs.pdf";
 
   return (
-    <div className="App">
+    <div className="app">
       <PdfViewer pathToFile={pathToFile} />
     </div>
   );

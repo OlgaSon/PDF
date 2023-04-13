@@ -7,6 +7,5 @@ export const calculateNewScale = (
 ): number => {
   const scaleUnit = direction * SCALE_STEP;
   const newScale = roundToDecimal(prevScale + scaleUnit);
-  const boundedScale = Math.min(Math.max(newScale, MIN_SCALE), MAX_SCALE);
-  return boundedScale;
+  return Math.min(Math.max(newScale, MIN_SCALE), MAX_SCALE);
 };

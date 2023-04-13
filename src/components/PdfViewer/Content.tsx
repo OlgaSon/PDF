@@ -27,29 +27,39 @@ export const Content: FC<IContentProps> = ({
 }) => {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(window.innerHeight);
-  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-  const [documentHeight, setDocumentHeight] = useState(0);
-  const [documentWidth, setDocumentWidth] = useState(0);
-  const pdfDocumentRef = useRef<HTMLDivElement>(null);
+  const [currentVisiblePageIndex, setCurrentVisiblePageIndex] = useState(0);
+  const [documentSize, setDocumentSize] = useState({ height: 0, width: 0 });
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
 
+  /* Prevent default touch behavior for two-finger touches 
+  so that the pinch gesture is properly handled with the useGesture hook. */
   useEffect(() => {
+    const pdf = pdfContainerRef.current;
+    if (!pdf) return;
+
     const handleTouchPreventDefault = (e: TouchEvent) => {
       if (e.touches.length === 2) e.preventDefault();
     };
-    const pdf = pdfDocumentRef.current;
-    if (pdf) {
-      pdf.addEventListener("touchstart", handleTouchPreventDefault);
-      pdf.addEventListener("touchmove", handleTouchPreventDefault);
-      pdf.addEventListener("touchend", handleTouchPreventDefault);
-    }
-  }, []);
+    pdf.addEventListener("touchstart", handleTouchPreventDefault);
+    pdf.addEventListener("touchmove", handleTouchPreventDefault);
+    pdf.addEventListener("touchend", handleTouchPreventDefault);
+
+    return () => {
+      pdf.removeEventListener("touchstart", handleTouchPreventDefault);
+      pdf.removeEventListener("touchmove", handleTouchPreventDefault);
+      pdf.removeEventListener("touchend", handleTouchPreventDefault);
+    };
+  }, [pdfContainerRef]);
 
   useEffect(() => {
-    if (pdfDocumentRef.current) {
-      setDocumentHeight(pdfDocumentRef.current.clientHeight);
-      setDocumentWidth(pdfDocumentRef.current.clientWidth);
-    }
-  }, [pdfDocumentRef]);
+    const pdf = pdfContainerRef.current;
+    if (!pdf) return;
+
+    setDocumentSize({
+      height: pdf.clientHeight,
+      width: pdf.clientWidth,
+    });
+  }, [pdfContainerRef]);
 
   const onDocumentLoadSuccess = (pdfObject: PDFDocumentProxy) => {
     setTotalPages(pdfObject.numPages);
@@ -60,7 +70,7 @@ export const Content: FC<IContentProps> = ({
     const firstPage = await pdfObject.getPage(1);
     const firstPageViewport = firstPage.getViewport({ scale: INITIAL_SCALE });
     const firstPageWidth = firstPageViewport.width;
-    const scalingFactor = roundToDecimal(documentWidth / firstPageWidth);
+    const scalingFactor = roundToDecimal(documentSize.width / firstPageWidth);
     if (scalingFactor < 1) {
       setPageScale(scalingFactor);
     }
@@ -68,18 +78,18 @@ export const Content: FC<IContentProps> = ({
 
   useGesture(
     {
-      onPinch: ({ active, direction, ...data }) => {
+      onPinch: ({ active, direction }) => {
         if (!active) return;
         const deltaX = direction[0];
         const deltaY = direction[1];
-        const zoomIn = deltaX > 0 && deltaY > 0;
-        const zoomOut = deltaX < 0 && deltaY < 0;
-        if (zoomIn || zoomOut) {
+        const isZoomIn = deltaX > 0 && deltaY > 0;
+        const isZoomOut = deltaX < 0 && deltaY < 0;
+        if (isZoomIn || isZoomOut) {
           const newScale = calculateNewScale(pageScale, deltaY);
           setPageScale(newScale);
         }
       },
-      onWheel: ({ active, ctrlKey, direction, event, ...data }) => {
+      onWheel: ({ active, ctrlKey, direction, event }) => {
         if (active && ctrlKey) {
           event.preventDefault();
           const deltaY = -direction[1];
@@ -89,7 +99,7 @@ export const Content: FC<IContentProps> = ({
       },
     },
     {
-      target: pdfDocumentRef,
+      target: pdfContainerRef,
       pinch: { pinchOnWheel: false },
       eventOptions: { passive: false },
     }
@@ -101,21 +111,21 @@ export const Content: FC<IContentProps> = ({
         className={styles.document}
         file={pathToFile}
         onLoadSuccess={onDocumentLoadSuccess}
-        inputRef={pdfDocumentRef}
+        inputRef={pdfContainerRef}
       >
         <List
           itemCount={totalPages}
           itemSize={pageSize}
           itemData={{
             pageScale,
-            visibleStartIndex,
+            currentVisiblePageIndex,
             setPageSize,
             setRenderTime,
           }}
-          height={documentHeight}
+          height={documentSize.height}
           width="100%"
           onItemsRendered={({ visibleStartIndex }) => {
-            setVisibleStartIndex(visibleStartIndex);
+            setCurrentVisiblePageIndex(visibleStartIndex);
           }}
         >
           {PageItem}

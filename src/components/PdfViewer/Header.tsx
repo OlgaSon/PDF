@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useCallback } from "react";
 import { ZoomIn, ZoomOut } from "../../assets";
 import { roundToDecimal, timeToString } from "../../utils";
 import { MAX_SCALE, MIN_SCALE, SCALE_STEP } from "./constants";
@@ -17,11 +17,13 @@ export const Header: FC<IHeaderProps> = ({
   pathToFile,
   renderTime,
 }) => {
-  const handleZoomIn = () =>
+  const handleZoomIn = useCallback(() => {
     setPageScale((prevScale) => roundToDecimal(prevScale + SCALE_STEP));
+  }, [setPageScale]);
 
-  const handleZoomOut = () =>
+  const handleZoomOut = useCallback(() => {
     setPageScale((prevScale) => roundToDecimal(prevScale - SCALE_STEP));
+  }, [setPageScale]);
 
   return (
     <header className={styles.header}>
@@ -31,14 +33,20 @@ export const Header: FC<IHeaderProps> = ({
         <div className={styles.filePath}>{pathToFile}</div>
         <div className={styles.renderDuration}>{timeToString(renderTime)}</div>
       </div>
-      <div className={styles.zoomControls}>
-        <button onClick={handleZoomOut} disabled={pageScale <= MIN_SCALE}>
-          <ZoomOut />
-        </button>
-        <button onClick={handleZoomIn} disabled={pageScale >= MAX_SCALE}>
-          <ZoomIn />
-        </button>
-      </div>
+      <button
+        className={styles.zoomButton}
+        onClick={handleZoomOut}
+        disabled={pageScale <= MIN_SCALE}
+      >
+        <ZoomOut />
+      </button>
+      <button
+        className={styles.zoomButton}
+        onClick={handleZoomIn}
+        disabled={pageScale >= MAX_SCALE}
+      >
+        <ZoomIn />
+      </button>
     </header>
   );
 };
